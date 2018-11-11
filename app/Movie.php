@@ -26,7 +26,11 @@ class Movie extends Model
     }
 
     public static function findByTitle($string) {
+        $data = Movie::whereRaw('LOWER(`title`) LIKE ?', array( "%".$string."%" ) )->get();
 
+        if(count($data)<10) return [];
+
+        return $data;
     }
 
     public static function storeData($data, MovieRepository $movie_data)
@@ -40,12 +44,14 @@ class Movie extends Model
             }
             $stored_movie = Movie::create($movie);
 
-            foreach($actors as $actor) {
-                $stored_movie->actors()->attach(Actor::create([
-                    "name"=>$actor["name"],
-                    "character"=>$actor["character"],
-                    "photo"=>$actor["photo"]
-                ]));
+            if(!empty($actors)) {
+                foreach ($actors as $actor) {
+                    $stored_movie->actors()->attach(Actor::create([
+                        "name" => $actor["name"],
+                        "character" => $actor["character"],
+                        "photo" => $actor["photo"]
+                    ]));
+                }
             }
         }
         return Movie::findById($stored_movie->id);
