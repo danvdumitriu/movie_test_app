@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Library\Services\DataParser;
+use App\Library\Services\MovieHelper;
 
 
 class MovieServiceProvider extends ServiceProvider
@@ -25,8 +25,8 @@ class MovieServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('App\Library\Services\DataParser', function ($app) {
-            return new DataParser();
+        $this->app->bind('App\Library\Services\MovieHelper', function ($app) {
+            return new MovieHelper();
         });
     }
 }

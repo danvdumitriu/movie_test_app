@@ -3,30 +3,65 @@
 namespace App\Http\Controllers;
 
 use Tmdb\Repository\MovieRepository;
-use App\Library\Services\DataParser;
-
+use Tmdb\Model\Search\SearchQuery\MovieSearchQuery;
+use App\Library\Services\MovieHelper;
+use Tmdb\Repository\FindRepository;
+use Tmdb\Repository\SearchRepository;
+use App\Movie;
 
 class MovieController extends Controller
 {
     private $movies;
-    private $data_parser;
+    private $helper;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(MovieRepository $movies, DataParser $dataParser)
+    public function __construct(MovieRepository $movies, MovieHelper $helper)
     {
         $this->movies = $movies;
-        $this->data_parser = $dataParser;
+        $this->helper = $helper;
     }
 
 
     public function index()
     {
-        //echo $this->data_parser->doSomethingUseful();
-        //$top_movies = $this->movies->getTopRated();
 
+    }
+
+    public function searchByImdbId($id, $find_by_id)
+    {
+        if($data=Movie::findByImdbId($id)) {
+            return $data;
+        } else {
+            $data = $find_by_id->findBy($id,["external_source"=>"imdb_id"])->getMovieResults();
+            if(count($data)) {
+                return Movie::storeData($data, $this->movies);
+            }
+        }
+        return [];
+    }
+
+    public function searchByTitle($string, $query, $search)
+    {
+        if($data=Movie::findByTitle($string)) {
+
+        } else {
+            $data = $search->searchMovie($string, $query);
+            $data = Movie::processMovieData($data);
+        }
+
+        return $data;
+    }
+
+    public function search($search_string, FindRepository $find_by_id, MovieSearchQuery $query, SearchRepository $search)
+    {
+        if($this->helper->isImdbId($search_string)) {
+            return $this->searchByImdbId($search_string, $find_by_id);
+        } else {
+            return $this->searchByTitle($search_string, $query, $search);
+        }
     }
 }
