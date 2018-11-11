@@ -15,6 +15,13 @@ class CreateMoviesTable extends Migration
     {
         Schema::create('movies', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('title');
+            $table->integer('tmdb_id');
+            $table->string('imdb_id');
+            $table->string("poster");
+            $table->text("overview");
+            $table->date('date');
+
             $table->timestamps();
         });
     }
