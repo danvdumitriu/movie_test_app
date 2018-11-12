@@ -38,7 +38,8 @@ class MovieController extends Controller
         } else {
             $data = $find_by_id->findBy($id,["external_source"=>"imdb_id"])->getMovieResults();
             if(count($data)) {
-                return Movie::storeData($data, $this->movies);
+                $data = Movie::processMovieDataWithDetails($data, $this->movies);
+                return Movie::storeData($data);
             }
         }
         return [];
@@ -51,7 +52,8 @@ class MovieController extends Controller
         } else {
             $data = $search->searchMovie($string, $query);
             if(count($data)) {
-                return Movie::processMovieData($data);
+                $data = Movie::processMovieData($data);
+                return Movie::storeData($data);
             }
         }
 
@@ -71,5 +73,10 @@ class MovieController extends Controller
                 "data" => $this->searchByTitle($search_string, $query, $search)
             ];
         }
+    }
+
+    public function getById($id)
+    {
+
     }
 }

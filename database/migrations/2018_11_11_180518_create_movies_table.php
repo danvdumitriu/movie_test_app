@@ -17,10 +17,9 @@ class CreateMoviesTable extends Migration
             $table->increments('id');
             $table->string('title');
             $table->integer('tmdb_id');
-            $table->string('imdb_id');
+            $table->string('imdb_id')->nullable();
             $table->string("poster");
             $table->text("overview");
-            $table->date('date');
 
             $table->timestamps();
         });

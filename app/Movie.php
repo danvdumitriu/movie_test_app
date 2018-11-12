@@ -8,7 +8,7 @@ use Tmdb\Repository\MovieRepository;
 class Movie extends Model
 {
     const IMAGE_ENDPOINT_W200 = "https://image.tmdb.org/t/p/w200/";
-    protected $fillable = ['title','tmdb_id','imdb_id','poster','overview','date'];
+    protected $fillable = ['title','tmdb_id','imdb_id','poster','overview'];
 
     public function actors()
     {
@@ -33,28 +33,62 @@ class Movie extends Model
         return $data;
     }
 
-    public static function storeData($data, MovieRepository $movie_data)
-    {
-        $processed = self::processMovieDataWithDetails($data, $movie_data);
+    public static function findByTmdbId($id) {
+        return Movie::where("tmdb_id", $id)->first();
+    }
 
-        foreach($processed as $movie) {
-            if(!empty($movie["actors"])) {
+    public static function isCompleteData($movie, $actors=false) {
+        if(!$actors) $actors = (isset($movie->actors) && count($movie->actors));
+        return (isset($movie->imdb_id) || $actors);
+    }
+
+    public static function isDuplicate($movie) {
+        $data = Movie::findByTmdbId($movie->tmdb_id);
+        if(count($data)>0) return $data;
+        return false;
+    }
+
+    public static function storeData($data)
+    {
+        $out = [];
+        foreach($data as $movie) {
+            $actors = [];
+            if (!empty($movie["actors"])) {
                 $actors = $movie["actors"];
                 unset($movie["actors"]);
             }
-            $stored_movie = Movie::create($movie);
+                if($existing=Movie::isDuplicate((object)$movie)) {
 
-            if(!empty($actors)) {
-                foreach ($actors as $actor) {
-                    $stored_movie->actors()->attach(Actor::create([
-                        "name" => $actor["name"],
-                        "character" => $actor["character"],
-                        "photo" => $actor["photo"]
-                    ]));
+                    if(Movie::isCompleteData((object)$movie,$actors) && !Movie::isCompleteData($existing)) {
+
+                        $existing->imdb_id = $movie["imdb_id"];
+                        $existing->save();
+
+                        Movie::saveActors($existing, $actors);
+                    }
+                    $stored_movie = $existing;
+
+
+
+                } else {
+                    $stored_movie = Movie::create($movie);
+
+                    Movie::saveActors($stored_movie, $actors);
                 }
-            }
+
+            $out = array_merge($out, Movie::findById($stored_movie->id));
         }
-        return Movie::findById($stored_movie->id);
+        return $out;
+    }
+
+    public static function saveActors($movie, $actors) {
+        foreach ($actors as $actor) {
+            $movie->actors()->attach(Actor::create([
+                "name" => $actor["name"],
+                "character" => $actor["character"],
+                "photo" => $actor["photo"]
+            ]));
+        }
     }
 
     public static function processMovieDataWithDetails($data, MovieRepository $movie_data)
