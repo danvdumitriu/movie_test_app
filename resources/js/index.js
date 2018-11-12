@@ -1,7 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Example from './components/Example';
+import Main from "./components/Main";
 
 if (document.getElementById('root')) {
-    ReactDOM.render(<Example />, document.getElementById('root'));
+    ReactDOM.render(
+        <div className="App">
+            <Main />
+        </div>,
+        document.getElementById('root'));
 }

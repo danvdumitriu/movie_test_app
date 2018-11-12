@@ -1,0 +1,108 @@
+.App {
+    text-align: center;
+}
+
+.App-logo {
+    animation: App-logo-spin infinite 20s linear;
+    height: 80px;
+}
+
+.App-header {
+    background-color: #222;
+    height: 150px;
+    padding: 20px;
+    color: white;
+}
+
+.App-title {
+    font-size: 1.5em;
+}
+
+.App-intro {
+    font-size: large;
+}
+
+@keyframes App-logo-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* custom css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.control input.search_text {
+    width:auto;
+    max-width: none;
+}
+
+.cons_listing div {
+    font-size: 13px;
+    text-align: left;
+}
+
+.listing_row h4 {
+    font-weight: 900;
+    text-align: left;
+}
+
+.cons_column {
+    margin-left: 15px;
+}
+
+.listing_row .details_column {
+    margin-left:50px;
+}
+
+.listing_description_text {
+    text-align: left;
+    padding-top: 14px;
+    font-size: 16px;
+}
+
+.odd_row .listing_content {
+    background-color: #fcf8e3ab;
+}
+
+.even_row .listing_content {
+    background-color: #006d9c0d;
+}
+
+.cons_listing figure {
+    margin:0 3px 0 0;
+}
+
+.state_text {
+    margin-top: 6px;
+}
+
+.listing_row h4 {
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.listing_row a {
+    text-decoration: none;
+}
+
+.navbar-brand a {
+    text-decoration: none;
+}
+
+.navbar-brand {
+    height: 52px;
+}
+
+.margin-vertical-10 {
+    margin: 10px 0;
+}
+
+.listing_image {
+    max-width: 100px;
+    max-height: 100px;
+    float: left;
+    margin: 15px;
+}
