@@ -8,6 +8,8 @@ use Tmdb\Repository\MovieRepository;
 class Movie extends Model
 {
     const IMAGE_ENDPOINT_W200 = "https://image.tmdb.org/t/p/w200/";
+    const MOVIE_MISSING_PHOTO = "missing_movie_poster.png";
+
     protected $fillable = ['title','tmdb_id','imdb_id','poster','overview'];
 
     public function actors()
@@ -27,7 +29,8 @@ class Movie extends Model
         return [$data];
     }
 
-    public static function findByTitle($string) {
+    public static function findByTitle($string)
+    {
         $data = Movie::whereRaw('LOWER(`title`) LIKE ?', array( "%".$string."%" ) )->get();
 
         if(count($data)<10) return [];
@@ -35,16 +38,19 @@ class Movie extends Model
         return $data;
     }
 
-    public static function findByTmdbId($id) {
+    public static function findByTmdbId($id)
+    {
         return Movie::where("tmdb_id", $id)->first();
     }
 
-    public static function isCompleteData($movie, $actors=false) {
+    public static function isCompleteData($movie, $actors=false)
+    {
         if(!$actors) $actors = (isset($movie->actors) && count($movie->actors));
         return (isset($movie->imdb_id) || $actors);
     }
 
-    public static function isDuplicate($movie) {
+    public static function isDuplicate($movie)
+    {
         $data = Movie::findByTmdbId($movie->tmdb_id);
         if(count($data)>0) return $data;
         return false;
@@ -83,13 +89,22 @@ class Movie extends Model
         return $out;
     }
 
-    public static function saveActors($movie, $actors) {
+    public static function saveActors($movie, $actors)
+    {
         foreach ($actors as $actor) {
             $movie->actors()->attach(Actor::create([
                 "name" => $actor["name"],
                 "character" => $actor["character"],
                 "photo" => $actor["photo"]
             ]));
+        }
+    }
+
+    public static function evaluatePhoto($photo_url) {
+        if(!empty($photo_url)) {
+            return self::IMAGE_ENDPOINT_W200.$photo_url;
+        } else {
+            return self::MOVIE_MISSING_PHOTO;
         }
     }
 
@@ -105,7 +120,7 @@ class Movie extends Model
             $single_movie_data["title"] = $movie_details->getTitle();
             $single_movie_data["tmdb_id"] = $movie_details->getId();
             $single_movie_data["imdb_id"] = $movie_details->getImdbId();
-            $single_movie_data["poster"] = self::IMAGE_ENDPOINT_W200.$movie_details->getPosterPath();
+            $single_movie_data["poster"] = self::evaluatePhoto($movie_details->getPosterPath());
             $single_movie_data["overview"] = $movie_details->getOverview();
             $single_movie_data["date"] = date("Y-m-d", time());
             $single_movie_data["actors"] = Actor::processActors($movie_details->getCredits());
@@ -125,7 +140,7 @@ class Movie extends Model
 
             $single_movie_data["title"] = $movie->getTitle();
             $single_movie_data["tmdb_id"] = $movie->getId();
-            $single_movie_data["poster"] = self::IMAGE_ENDPOINT_W200.$movie->getPosterPath();
+            $single_movie_data["poster"] = self::evaluatePhoto($movie->getPosterPath());
             $single_movie_data["overview"] = $movie->getOverview();
 
             $processed[] = $single_movie_data;
