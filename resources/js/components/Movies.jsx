@@ -142,12 +142,11 @@ class Movies extends Component {
     }
 
     renderRouter = () => {
-        console.log("rrouter",this.state);
-
         if(this.state.search_results && this.state.listing) {
             return this.renderListing();
         } else if(this.state.movie_details && !this.state.listing) {
-            console.log(this.state.movie_details && !this.state.listing);
+            return this.renderDetails();
+        } else if(this.state.search_results && !this.state.listing) {
             return this.renderDetails();
         }
     }
@@ -191,7 +190,7 @@ class Movies extends Component {
 
     renderDetails = () => {
         console.log("22details");
-        let movie = this.state.movie_details[0];
+        let movie = this.state.movie_details?this.state.movie_details[0]:this.state.search_results[0];
 
         return (
             <Columns className="details_container">
