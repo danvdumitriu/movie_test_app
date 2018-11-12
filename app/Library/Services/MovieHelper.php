@@ -7,4 +7,11 @@ class MovieHelper
     {
         return (bool)preg_match("/^tt(\d+)$/",$string);
     }
+
+    public function setResponse($data, $listing=false) {
+        return [
+            "listing"=>$listing,
+            "data"=>$data
+        ];
+    }
 }

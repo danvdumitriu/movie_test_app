@@ -63,20 +63,33 @@ class MovieController extends Controller
     public function search($search_string, FindRepository $find_by_id, MovieSearchQuery $query, SearchRepository $search)
     {
         if($this->helper->isImdbId($search_string)) {
-            return [
-                "listing" => false,
-                "data" => $this->searchByImdbId($search_string, $find_by_id)
-            ];
+
+            return $this->helper->setResponse(
+                $this->searchByImdbId($search_string, $find_by_id)
+            );
+
         } else {
-            return [
-                "listing" => true,
-                "data" => $this->searchByTitle($search_string, $query, $search)
-            ];
+
+            return $this->helper->setResponse(
+                $this->searchByTitle($search_string, $query, $search),
+                true
+            );
+
         }
     }
 
     public function getById($id)
     {
+        if($data=Movie::findById($id)) {
+            if(Movie::isCompleteData($data)) return $this->helper->setResponse($data);
 
+            $data = Movie::processMovieDataWithDetails($data, $this->movies);
+
+            return $this->helper->setResponse(
+                Movie::storeData($data)
+            );
+        }
+
+        return $this->helper->setResponse([]);
     }
 }

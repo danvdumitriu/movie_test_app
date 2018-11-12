@@ -22,7 +22,9 @@ class Movie extends Model
 
     public static function findById($id)
     {
-        return [Movie::with("actors")->find($id)];
+        $data = Movie::with("actors")->find($id);
+        if(count($data)<1) return [];
+        return [$data];
     }
 
     public static function findByTitle($string) {
@@ -97,7 +99,8 @@ class Movie extends Model
 
         foreach($data as $movie) {
             $single_movie_data = [];
-            $movie_details = $movie_data->load($movie->getId());
+            $id = method_exists($movie,"getId")?$movie->getId():$movie["tmdb_id"];
+            $movie_details = $movie_data->load($id);
 
             $single_movie_data["title"] = $movie_details->getTitle();
             $single_movie_data["tmdb_id"] = $movie_details->getId();
