@@ -58,7 +58,7 @@ body {
 }
 
 .listing_description_text {
-    text-align: left;
+    text-align: justify;
     padding-top: 14px;
     font-size: 16px;
 }
@@ -105,4 +105,13 @@ body {
     max-height: 100px;
     float: left;
     margin: 15px;
+}
+
+.details_actor_photo {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+div.details_container {
+    margin-top: 20px;
 }

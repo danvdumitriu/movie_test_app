@@ -7,9 +7,11 @@ import { BrowserRouter as Router, Route, Link, Prompt, Redirect, Switch } from "
 
 const default_params = {
     keyword: null, //for search,
-    search_results: [],
+    search_results: null,
     no_search_results: null,
-    listing: null
+    listing: null,
+    movie_id: null,
+    movie_details: null
 };
 
 class Movies extends Component {
@@ -28,8 +30,8 @@ class Movies extends Component {
         window.removeEventListener("hashchange", () => this.process(null,null), false);
     }
 
-    getWoeid = () => {
-        return this.getHashParam("weather");
+    getMovieId = () => {
+        return this.getHashParam("movie");
     }
 
     getKeyword = () => {
@@ -43,21 +45,64 @@ class Movies extends Component {
         return null;
     }
 
-    process = (search) => {
-        search = (search)?search:this.getKeyword();
+    process = (search, movie_id) => {
+        console.log("params11", search, movie_id);
 
-        console.log(search);
+        this.setState(default_params, () => {
 
-        if(search) {
-            this.setState({
-                keyword: search
+            search = (search) ? search : this.getKeyword();
+            movie_id = (movie_id) ? movie_id : this.getMovieId();
 
-            }, () => {
-                if (this.validateKeyWord()) {
-                    this.fetchMovies();
+            console.log("params", search, movie_id);
+
+            if (search) {
+                this.setState({
+                    keyword: search,
+                    movie_id: null
+
+                }, () => {
+                    if (this.validateKeyWord()) {
+                        this.fetchMovies();
+                    }
+                });
+            } else if (movie_id) {
+                this.setState({
+                    keyword: null,
+                    movie_id: movie_id
+
+                }, () => {
+                    this.fetchMovieDetails();
+                });
+            }
+        });
+    }
+
+    fetchMovieDetails = (movie_id) => {
+        movie_id = movie_id?movie_id:this.state.movie_id;
+        if(!movie_id) {
+            console.error("ERR#2: no movie id!");
+            return;
+        }
+
+        fetch('/api/movie/id/'+movie_id)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log("data",data,data.data.length);
+                if(data.data.length<1) { //NO results
+                    //this.setState({no_search_results: true});
+
+                } else { //there ARE results
+
+                    this.setState({
+                        movie_details: data.data,
+                        listing: data.listing
+                    }, () => {
+                        console.log("state",this.state);
+                    });
                 }
             });
-        }
     }
 
     fetchMovies = (keyword) => {
@@ -73,7 +118,10 @@ class Movies extends Component {
             .then(data => {
                 console.log("data",data,data.data.length);
                 if(data.data.length<1) { //NO results for keyword
-                    this.setState({no_search_results: true});
+                    this.setState({
+                        no_search_results: true,
+                        search_results: []
+                    });
 
                 } else { //there ARE results for keyword
 
@@ -94,12 +142,13 @@ class Movies extends Component {
     }
 
     renderRouter = () => {
-        if(this.state.search_results) {
-            if(this.state.listing) {
-                return this.renderListing();
-            } else {
-                return this.renderDetails();
-            }
+        console.log("rrouter",this.state);
+
+        if(this.state.search_results && this.state.listing) {
+            return this.renderListing();
+        } else if(this.state.movie_details && !this.state.listing) {
+            console.log(this.state.movie_details && !this.state.listing);
+            return this.renderDetails();
         }
     }
 
@@ -117,14 +166,14 @@ class Movies extends Component {
                     </Columns.Column>
                     <Columns.Column size={1} className="listing_content">
                         <Router>
-                            <Link to={"/#/movie/"+movie.id} onClick={() => this.process(null,location.woeid)}>
+                            <Link to={"/#/movie/"+movie.id} onClick={() => this.process(null,movie.id)}>
                                 <img className="listing_image" src={movie.poster} />
                             </Link>
                         </Router>
                     </Columns.Column>
                     <Columns.Column size={1} className="listing_content">
                         <Router>
-                            <Link to={"/#/movie/"+movie.id} onClick={() => this.process(null,location.woeid)}>
+                            <Link to={"/#/movie/"+movie.id} onClick={() => this.process(null,movie.id)}>
                                 <h4 className="is-primary">{movie.title}</h4>
                             </Link>
                         </Router>
@@ -141,7 +190,52 @@ class Movies extends Component {
     }
 
     renderDetails = () => {
-        return("");
+        console.log("22details");
+        let movie = this.state.movie_details[0];
+
+        return (
+            <Columns className="details_container">
+                <Columns.Column size={1}>
+                </Columns.Column>
+                <Columns.Column size={2} className="details_content">
+                    <img className="details_image" src={movie.poster} />
+                </Columns.Column>
+                <Columns.Column size={7} className="details_content">
+                    <h2 className="primary">{movie.title}</h2>
+                    <div className="listing_description_text">
+                        {movie.overview}
+                    </div>
+                    <div className="details_cast">
+                        {movie.actors.map((actor,i) => {
+                            return this.renderActors(actor,i);
+                        })}
+                    </div>
+                </Columns.Column>
+                <Columns.Column size={1}>
+                </Columns.Column>
+            </Columns>
+        );
+    }
+
+    renderActors = (actor, i) => {
+        return (
+            <Columns className="details_container" key={i}>
+                <Columns.Column size={1}>
+                </Columns.Column>
+                <Columns.Column size={1} className="details_content">
+                    <img className="details_actor_photo" src={actor.photo} />
+                </Columns.Column>
+                <Columns.Column size={3} className="details_content">
+                    <h4 className="primary">{actor.name}</h4>
+                </Columns.Column>
+                <Columns.Column size={1}>
+                    <p>...</p>
+                </Columns.Column>
+                <Columns.Column size={3} className="details_content">
+                    <h4 className="primary">{actor.character}</h4>
+                </Columns.Column>
+            </Columns>
+        );
     }
 
     render() {
