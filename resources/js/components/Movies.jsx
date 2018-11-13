@@ -11,7 +11,8 @@ const default_params = {
     no_search_results: null,
     listing: null,
     movie_id: null,
-    movie_details: null
+    movie_details: null,
+    top10: null
 };
 
 class Movies extends Component {
@@ -73,8 +74,40 @@ class Movies extends Component {
                 }, () => {
                     this.fetchMovieDetails();
                 });
+            } else {
+                this.fetchTop10();
             }
         });
+    }
+
+    fetchTop10 = () => {
+        fetch('/api/movie/get_top10')
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log("data",data,data.data.length);
+                if(data.data.length<1) { //NO results
+                    //this.setState({no_search_results: true});
+
+                } else { //there ARE results
+
+                    this.setState({
+                        search_results: data.data,
+                        listing: data.listing,
+                        top10: true
+                    }, () => {
+                        console.log("state",this.state);
+                    });
+
+                    // this.setState({
+                    //     movie_details: data.data,
+                    //     listing: data.listing
+                    // }, () => {
+                    //     console.log("state",this.state);
+                    // });
+                }
+            });
     }
 
     fetchMovieDetails = (movie_id) => {
@@ -163,6 +196,13 @@ class Movies extends Component {
                 <Columns className={"listing_row "+row_class} key={i}>
                     <Columns.Column size={1}>
                     </Columns.Column>
+                    {this.state.top10 ? (
+                        <Columns.Column size={1} className="listing_content listing_rank">
+                            <h2 className="primary">
+                                {movie.top_rank}
+                            </h2>
+                        </Columns.Column>
+                    ) : ("")}
                     <Columns.Column size={1} className="listing_content">
                         <Router>
                             <Link to={"/#/movie/"+movie.id} onClick={() => this.process(null,movie.id)}>
@@ -182,6 +222,7 @@ class Movies extends Component {
                             {movie.overview}
                         </div>
                     </Columns.Column>
+                    
                 </Columns>
             );
         });
@@ -191,6 +232,8 @@ class Movies extends Component {
     renderDetails = () => {
         console.log("22details");
         let movie = this.state.movie_details?this.state.movie_details[0]:this.state.search_results[0];
+
+        if(!movie) return('');
 
         return (
             <Columns className="details_container">
@@ -253,6 +296,9 @@ class Movies extends Component {
                 ) : ("")}
 
                 <div>
+                    {this.state.top10 ? (<h2 className="primary">
+                        Top 10
+                    </h2>) : ("")}
                     {this.renderRouter()}
                 </div>
 

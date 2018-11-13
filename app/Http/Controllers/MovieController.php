@@ -97,8 +97,8 @@ class MovieController extends Controller
     public function getTop10()
     {
         if($data=Movie::getTop10()) {
-            return $data;
-            //return $this->helper->setResponse($data);
+
+            return $this->helper->setResponse($data,true);
 
         } else {
             $data = $this->movies->getTopRated();
@@ -107,7 +107,8 @@ class MovieController extends Controller
                 $data = Movie::processMovieData($data);
 
                 return $this->helper->setResponse(
-                    Movie::storeData($data, true)
+                    Movie::storeData($data, true),
+                    true
                 );
             }
 

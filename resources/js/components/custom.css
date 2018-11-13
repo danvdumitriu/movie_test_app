@@ -88,6 +88,12 @@ body {
     text-decoration: none;
 }
 
+.listing_row div.listing_rank {
+    width: 15px;
+    padding-top: 40px;
+    padding-left: 27px;
+}
+
 .navbar-brand a {
     text-decoration: none;
 }
