@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import Columns from 'react-bulma-components/lib/components/columns';
-import Image from 'react-bulma-components/lib/components/image';
-import Media from 'react-bulma-components/lib/components/media';
-import Content from 'react-bulma-components/lib/components/content';
 import { BrowserRouter as Router, Route, Link, Prompt, Redirect, Switch } from "react-router-dom";
+import Loader from 'react-loader-spinner'
 
 const default_params = {
     keyword: null, //for search,
@@ -12,7 +10,8 @@ const default_params = {
     listing: null,
     movie_id: null,
     movie_details: null,
-    top10: null
+    top10: null,
+    loading: null
 };
 
 class Movies extends Component {
@@ -59,7 +58,8 @@ class Movies extends Component {
             if (search) {
                 this.setState({
                     keyword: search,
-                    movie_id: null
+                    movie_id: null,
+                    loading: true,
 
                 }, () => {
                     if (this.validateKeyWord()) {
@@ -69,14 +69,20 @@ class Movies extends Component {
             } else if (movie_id) {
                 this.setState({
                     keyword: null,
-                    movie_id: movie_id
+                    movie_id: movie_id,
+                    loading: true
 
                 }, () => {
                     this.fetchMovieDetails();
                 });
             } else {
-                this.fetchTop10();
+                this.setState({
+                    loading: true
+                }, () => {
+                    this.fetchTop10();
+                });
             }
+
         });
     }
 
@@ -95,7 +101,8 @@ class Movies extends Component {
                     this.setState({
                         search_results: data.data,
                         listing: data.listing,
-                        top10: true
+                        top10: true,
+                        loading: false
                     }, () => {
                         console.log("state",this.state);
                     });
@@ -130,7 +137,8 @@ class Movies extends Component {
 
                     this.setState({
                         movie_details: data.data,
-                        listing: data.listing
+                        listing: data.listing,
+                        loading: false
                     }, () => {
                         console.log("state",this.state);
                     });
@@ -161,7 +169,8 @@ class Movies extends Component {
                     this.setState({
                         search_results: data.data,
                         no_search_results: false,
-                        listing: data.listing
+                        listing: data.listing,
+                        loading: false
                     }, () => {
                         console.log("state",this.state);
                     });
@@ -217,12 +226,12 @@ class Movies extends Component {
                             </Link>
                         </Router>
                     </Columns.Column>
-                    <Columns.Column size={7} className="listing_content">
+                    <Columns.Column size={6} className="listing_content">
                         <div className="listing_description_text">
                             {movie.overview}
                         </div>
                     </Columns.Column>
-                    
+
                 </Columns>
             );
         });
@@ -283,8 +292,12 @@ class Movies extends Component {
     render() {
         return (
             <div>
+                {this.state.loading ? (
+                    <Loader type="Circles" color="#006e9a" height={80} width={80}/>
+                ) : ("")}
+
                 {this.state.keyword && this.validateKeyWord() ? (<p>
-                    Showing results for: <span className="primary"> {this.state.keyword} </span>
+                    Showing results for: <span className="primary"> {this.state.keyword.replace("%20"," ")} </span>
                 </p>) : ("")}
 
                 {this.state.keyword && !this.validateKeyWord() ? (<p>
