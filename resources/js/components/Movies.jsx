@@ -45,15 +45,17 @@ class Movies extends Component {
         return null;
     }
 
+    /*
+     *  Main router in the component. Decides the route base on hash format, or received params.
+     *
+     */
     process = (search, movie_id) => {
-        console.log("params11", search, movie_id);
 
         this.setState(default_params, () => {
 
             search = (search) ? search : this.getKeyword();
             movie_id = (movie_id) ? movie_id : this.getMovieId();
 
-            console.log("params", search, movie_id);
 
             if (search) {
                 this.setState({
@@ -92,27 +94,15 @@ class Movies extends Component {
                 return response.json();
             })
             .then(data => {
-                console.log("data",data,data.data.length);
-                if(data.data.length<1) { //NO results
-                    //this.setState({no_search_results: true});
 
-                } else { //there ARE results
+                if(data.data.length>=1) { //there ARE results
 
                     this.setState({
                         search_results: data.data,
                         listing: data.listing,
                         top10: true,
                         loading: false
-                    }, () => {
-                        console.log("state",this.state);
                     });
-
-                    // this.setState({
-                    //     movie_details: data.data,
-                    //     listing: data.listing
-                    // }, () => {
-                    //     console.log("state",this.state);
-                    // });
                 }
             });
     }
@@ -129,18 +119,13 @@ class Movies extends Component {
                 return response.json();
             })
             .then(data => {
-                console.log("data",data,data.data.length);
-                if(data.data.length<1) { //NO results
-                    //this.setState({no_search_results: true});
 
-                } else { //there ARE results
+                if(data.data.length>=1) { //there ARE results
 
                     this.setState({
                         movie_details: data.data,
                         listing: data.listing,
                         loading: false
-                    }, () => {
-                        console.log("state",this.state);
                     });
                 }
             });
@@ -157,7 +142,7 @@ class Movies extends Component {
                 return response.json();
             })
             .then(data => {
-                console.log("data",data,data.data.length);
+
                 if(data.data.length<1) { //NO results for keyword
                     this.setState({
                         no_search_results: true,
@@ -171,8 +156,6 @@ class Movies extends Component {
                         no_search_results: false,
                         listing: data.listing,
                         loading: false
-                    }, () => {
-                        console.log("state",this.state);
                     });
                 }
             });
@@ -196,8 +179,6 @@ class Movies extends Component {
     renderListing = () => {
 
         let results = this.state.search_results;
-
-        console.log("results",results);
 
         return results.map((movie, i) => {
             let row_class = i%2?"odd_row":"even_row";
@@ -239,7 +220,7 @@ class Movies extends Component {
     }
 
     renderDetails = () => {
-        console.log("22details");
+
         let movie = this.state.movie_details?this.state.movie_details[0]:this.state.search_results[0];
 
         if(!movie) return('');
