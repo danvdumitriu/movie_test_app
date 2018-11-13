@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Toprated;
 use Tmdb\Repository\MovieRepository;
 use Tmdb\Model\Search\SearchQuery\MovieSearchQuery;
 use App\Library\Services\MovieHelper;
@@ -26,12 +25,13 @@ class MovieController extends Controller
         $this->helper = $helper;
     }
 
-
-    public function index()
-    {
-
-    }
-
+    /**
+     * Searches by IMDB id
+     *
+     * @param $id received from API request
+     * @param $find_by_id FindRepository
+     * @return array
+     */
     public function searchByImdbId($id, $find_by_id)
     {
         if($data=Movie::findByImdbId($id)) {
@@ -46,6 +46,14 @@ class MovieController extends Controller
         return [];
     }
 
+    /**
+     * Searches by string in movie title
+     *
+     * @param $string received from API request
+     * @param $query instance of MovieSearchQuery
+     * @param $search instance of SearchRepository
+     * @return array
+     */
     public function searchByTitle($string, $query, $search)
     {
         if($data=Movie::findByTitle($string)) {
@@ -61,6 +69,15 @@ class MovieController extends Controller
         return [];
     }
 
+    /**
+     * Movie search by name or IMDB id API endpoint.
+     *
+     * @param $search_string param reveived from API request
+     * @param FindRepository $find_by_id
+     * @param MovieSearchQuery $query
+     * @param SearchRepository $search
+     * @return array
+     */
     public function search($search_string, FindRepository $find_by_id, MovieSearchQuery $query, SearchRepository $search)
     {
         if($this->helper->isImdbId($search_string)) {
@@ -79,6 +96,12 @@ class MovieController extends Controller
         }
     }
 
+    /**
+     * API endpoint for getting movie by id
+     *
+     * @param $id
+     * @return array
+     */
     public function getById($id)
     {
         if($data=Movie::findById($id)) {
