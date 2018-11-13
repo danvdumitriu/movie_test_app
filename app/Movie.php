@@ -9,6 +9,7 @@ class Movie extends Model
 {
     const IMAGE_ENDPOINT_W200 = "https://image.tmdb.org/t/p/w200/";
     const MOVIE_MISSING_PHOTO = "missing_movie_poster.png";
+    const EXPIRE_TIME_TOP10 = 60*60*24; //one day, in seconds
 
     protected $fillable = ['title','tmdb_id','imdb_id','poster','overview'];
 
@@ -165,8 +166,20 @@ class Movie extends Model
         return $processed;
     }
 
+    public static function checkTop10Cache()
+    {
+        $top_data = Toprated::all()->first();
+        if(count($top_data)<1) return;
+
+        $created = strtotime($top_data->created_at->toDateTimeString());
+        if(time() > $created + self::EXPIRE_TIME_TOP10) {
+            Toprated::truncate();
+        }
+    }
+
     public static function getTop10()
     {
+        self::checkTop10Cache();
 
         $data = Movie::with(["toprated" => function($query)
         {
@@ -179,6 +192,8 @@ class Movie extends Model
             $movie["top_rank"] = $movie["toprated"]["top_number"];
             unset($movie["toprated"]);
         }
+
+        if(count($data)<1) return [];
 
         return $data;
     }
