@@ -128,11 +128,14 @@ class MovieController extends Controller
 
             if(count($data)) {
                 $data = Movie::processMovieData($data);
+                $data = Movie::storeData($data, true);
 
-                return $this->helper->setResponse(
-                    Movie::storeData($data, true),
-                    true
-                );
+                foreach($data as $key => &$value) {
+                    if($key>=10) unset($data[$key]);
+                    else $value["top_rank"] = $key+1;
+                }
+
+                return $this->helper->setResponse($data, true);
             }
 
         }
