@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Toprated;
 use Tmdb\Repository\MovieRepository;
 use Tmdb\Model\Search\SearchQuery\MovieSearchQuery;
 use App\Library\Services\MovieHelper;
@@ -88,6 +89,28 @@ class MovieController extends Controller
             return $this->helper->setResponse(
                 Movie::storeData($data)
             );
+        }
+
+        return $this->helper->setResponse([]);
+    }
+
+    public function getTop10()
+    {
+        if($data=Movie::getTop10()) {
+            return $data;
+            //return $this->helper->setResponse($data);
+
+        } else {
+            $data = $this->movies->getTopRated();
+
+            if(count($data)) {
+                $data = Movie::processMovieData($data);
+
+                return $this->helper->setResponse(
+                    Movie::storeData($data, true)
+                );
+            }
+
         }
 
         return $this->helper->setResponse([]);

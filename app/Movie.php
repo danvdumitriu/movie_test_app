@@ -17,6 +17,12 @@ class Movie extends Model
         return $this->belongsToMany(Actor::class);
     }
 
+    public function toprated()
+    {
+        return $this->hasOne(Toprated::class);
+    }
+
+
     public static function findByImdbId($id)
     {
         return Movie::with("actors")->where("imdb_id", $id)->get()->toArray();
@@ -56,10 +62,12 @@ class Movie extends Model
         return false;
     }
 
-    public static function storeData($data)
+    public static function storeData($data, $top_save=false)
     {
         $out = [];
-        foreach($data as $movie) {
+        $top_data = [];
+
+        foreach($data as $key => $movie) {
             $actors = [];
             if (!empty($movie["actors"])) {
                 $actors = $movie["actors"];
@@ -84,8 +92,16 @@ class Movie extends Model
                     Movie::saveActors($stored_movie, $actors);
                 }
 
+            $top_data = array_merge($top_data, [[
+                "top_number" => $key+1,
+                "movie_id"   => $stored_movie->id,
+                "created_at" => date("Y-m-d H:i:s")
+            ]]);
             $out = array_merge($out, Movie::findById($stored_movie->id));
         }
+
+        if($top_save) Toprated::insert($top_data);
+
         return $out;
     }
 
@@ -147,5 +163,23 @@ class Movie extends Model
         }
 
         return $processed;
+    }
+
+    public static function getTop10()
+    {
+
+        $data = Movie::with(["toprated" => function($query)
+        {
+            $query->where('top_number', '<=', '10');
+
+        }])->get();
+
+        foreach($data as $key => &$movie) {
+            if(empty($movie["toprated"])) unset($data[$key]);
+            $movie["top_rank"] = $movie["toprated"]["top_number"];
+            unset($movie["toprated"]);
+        }
+
+        return $data;
     }
 }

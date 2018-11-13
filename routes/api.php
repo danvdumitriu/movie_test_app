@@ -19,3 +19,4 @@ use Illuminate\Http\Request;
 
 Route::get('movie/search/{name}',                'MovieController@search');
 Route::get('movie/id/{id}',                      'MovieController@getById');
+Route::get('movie/get_top10',                    'MovieController@getTop10');
